@@ -123,12 +123,12 @@ class LinearizationPowerSC : private LinearizationSC<Scalar_, POSE_SIZE_> {
     }
   }
 
-  // Solve RCS (Eq. 23)
+  // Solve RCS (Eq. 23) po ba论文上的方程23
   Summary solve(const VecX& b_p, VecX& accum, PerSolveOptions& pso) const {
     ROOTBA_ASSERT(static_cast<size_t>(b_p.size()) == POSE_SIZE * num_cameras_);
 
     Summary summary;
-
+    //? 幂级数展开具体如何实现的?
     accum = right_mul_Hpp_inv(-b_p);
     VecX tmp = accum;
 
@@ -138,6 +138,7 @@ class LinearizationPowerSC : private LinearizationSC<Scalar_, POSE_SIZE_> {
 
       // Convergence check
       if (pso.q_tolerance > 0) {
+        // 对应power ba 论文公式（32）
         const Scalar zeta = i * tmp.norm() / accum.norm();
         if (zeta < pso.q_tolerance) {
           summary.termination_type = Summary::LINEAR_SOLVER_SUCCESS;
@@ -182,6 +183,7 @@ class LinearizationPowerSC : private LinearizationSC<Scalar_, POSE_SIZE_> {
 
     MatX accm = Hpp_inv;
     MatX tmp = accm;
+    // 这里就是标准的幂级数展开：乘加计算
     for (size_t i = 1; i <= order; ++i) {
       tmp = Hpp_inv * Jp.transpose() * Jl * Hll_inv * Jl.transpose() * Jp * tmp;
       accm += tmp;

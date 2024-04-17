@@ -143,16 +143,19 @@ typename LinearizorPowerSC<Scalar_>::VecX LinearizorPowerSC<Scalar_>::solve(
   VecX b_p;
   {
     Timer timer;
+    // 准备用于求解的b_p, Hpp_inv, and Hll_inv (cached inside landmark block)
     lsc_->prepare_Hb(b_p);
     IF_SET(it_summary_)->prepare_time_in_seconds = timer.elapsed();
   }
 
   // run power series solver
   typename ConjugateGradientsSolver<Scalar>::PerSolveOptions pso;
+  // eta就是论文Eq.32里面的ϵ, 停止标准：表示幂级数展开停止的的阈值
   pso.q_tolerance = options_.eta;
   VecX inc;
   {
     Timer timer;
+    // 求解位姿增量x_p
     const auto summary = lsc_->solve(b_p, inc, pso);
     IF_SET(it_summary_)->solve_reduced_system_time_in_seconds = timer.elapsed();
     IF_SET(it_summary_)->linear_solver_iterations = summary.power_order;

@@ -299,6 +299,7 @@ void optimize_lm_ours(BalProblem<Scalar>& bal_problem,
     // TODO: avoid recomputation of error if we call linearizor->linearize()
     // anyway (only for iteration 0 we can call compute_error instead)...
     ResidualInfo ri;
+    // 计算所有路标的残差
     linearizor->compute_error(ri);
 
     std::cout << "Iteration {}, {}\n"_format(
@@ -322,6 +323,7 @@ void optimize_lm_ours(BalProblem<Scalar>& bal_problem,
       continue;
     }
 
+    // 线性化所有路标点，power ba 看LinearizorPowerSC<Scalar_>::linearize()
     linearizor->linearize();
 
     std::cout << "\t[INFO] Stage 1 time {:.3f}s.\n"_format(
@@ -341,7 +343,7 @@ void optimize_lm_ours(BalProblem<Scalar>& bal_problem,
         timer_iteration.reset();
       }
 
-      // dampen and solve linear system
+      // dampen and solve linear system 设置阻尼因子并求解线性系统
       VecX inc = linearizor->solve(lambda);
 
       std::cout << "\t[INFO] Stage 2 time {:.3f}s.\n"_format(
